@@ -1,0 +1,60 @@
+.user-assignment-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 35px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin: 10px;
+}
+
+.user-assignment-panel label {
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 6px;
+}
+
+.user-assignment-panel select,
+.user-assignment-panel input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  margin-right: 50px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background-color: #fff;
+  font-size: 14px;
+  color: #333;
+  transition: border-color 0.3s ease;
+}
+
+.user-assignment-panel select:focus,
+.user-assignment-panel input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 4px rgba(0, 123, 255, 0.2);
+}
+
+.user-assignment-panel button {
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+
+}
+
+.user-assignment-panel button:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+}
+
+.user-assignment-panel button:active {
+  transform: translateY(1px);
+}

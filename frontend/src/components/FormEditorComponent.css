@@ -1,0 +1,17 @@
+.btn1{
+    padding: 5px 50px ;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-right:950px ;
+    padding-top: 10px;
+}
+.fjs-powered-by a{
+    display: none;
+}
+.fjs-palette-entries{
+    overflow-y: scroll ;
+}
+#form-editor{
+    height: 650px;
+}

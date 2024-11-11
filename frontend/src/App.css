@@ -1,0 +1,109 @@
+#root {
+  
+  margin: 0 auto;
+  text-align: center;
+}
+
+.container{
+  display: flex;
+  margin-bottom: 20px;
+  /* border: solid 1px black; */
+  height: 630px;
+  width: 120%;
+}
+.text{
+  font-weight: 400;
+  font-size: 30px;
+  cursor: pointer;
+}
+
+.btn {
+  padding: 5px 30px ;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-right:700px ;
+}
+
+.btn-left{
+  cursor: pointer;
+  background-color: rgb(240, 240, 240);
+  color: rgb(0, 0, 0);
+  border-radius: 12px;
+  border: none;
+  font-size: 20px;
+  font-weight: bold ;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 20px;
+}
+.btn-mid{
+  cursor: pointer;
+  background-color: rgb(240, 240, 240);
+  color: rgb(12, 12, 12);
+  border-radius: 12px;
+  border: none;
+  font-size: 20px;
+  font-weight: bold ;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 20px;
+}
+.btn-right{
+  cursor: pointer;
+  background-color: rgb(240, 240, 240);
+  color: rgb(22, 19, 19);
+  border-radius: 12px;
+  border: none;
+  font-size: 20px;
+  font-weight: bold ;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 20px;
+  
+}
+.panel-container{
+  display: flex;
+  justify-content:space-between;
+  align-items: center;
+  margin-top: 20px;
+}
+.properties-panel{
+  height: 655px;
+  margin-right: 20px;
+}
+
+@media (max-width: 900px){
+  .btn{
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 300px;
+  }
+}
+
+.btn-left img{
+  height: 20px;
+  width: 20px;
+}
+
+.btn-mid img {
+  height: 20px;
+  width: 20px;
+}
+.btn-right img{
+  height: 20px;
+  width: 20px;
+}
+
+.container a{
+  display: none;
+}
+
+[data-group-id="group-CamundaPlatform__UserAssignment"] {
+  display: none;
+}
+
