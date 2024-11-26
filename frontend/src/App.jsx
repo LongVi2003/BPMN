@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState, Component} from 'react';
 import './App.css';
 import BpmnModeler from 'bpmn-js/lib/Modeler';
@@ -18,6 +17,7 @@ import { CreateAppendAnythingModule } from 'bpmn-js-create-append-anything';
 import UserAssignment from './UserAssignment/UserAssignment.jsx';
 import Alert from '@mui/material/Alert';
 import { Link } from 'react-router-dom';
+import NavBar from './NavBar/NavBar.jsx';
 
 
 import {
@@ -33,6 +33,31 @@ function App() {
   const hasChanges = useRef(false);
   const [showUserAssignment, setShowUserAssignment] = useState(false);
   const [selectedElement, setSelectedElement] = useState(null);
+
+
+
+  const saveToLocalStorage = async () => {
+    try {
+      const { xml } = await modelerRef.current.saveXML({ format: true });
+      localStorage.setItem('bpmnDiagram', xml);
+      console.log('BPMN diagram saved to localStorage');
+    } catch (err) {
+      console.error('Error saving to localStorage:', err);
+    }
+  };
+  const loadFromLocalStorage = async () => {
+    const xml = localStorage.getItem('bpmnDiagram');
+    if(xml){
+      try{
+        await modelerRef.current.importXML(xml);
+        console.log('BPMN diagram load từ local storage thành công');
+      }catch(e){
+        console.log("",e);        
+      }
+    }else{
+      loadDiagram();
+    }
+  }
 
   const loadDiagram = async (file) => {
     try {
@@ -91,7 +116,7 @@ function App() {
   
       if (response.ok) {
         const data = await response.json();
-        alert('BPMN diagram deployed successfully!');
+        alert('BPMN diagram deployed thành công vào Camunda Cockpit!');
         console.log('Deployment Response:', data);
       } else {
         const errorText = await response.text();
@@ -123,11 +148,12 @@ function App() {
       },
     });
 
-    loadDiagram();
+    loadFromLocalStorage();
 
     modelerRef.current.on('commandStack.changed', () => {
       console.log('Diagram changed');
       hasChanges.current = true;
+      saveToLocalStorage();
     });
 
     modelerRef.current.on('selection.changed', (event) => {
@@ -178,6 +204,7 @@ function App() {
 
   return (
     <div className="App">
+      <NavBar/>
       <div className="panel-container">
         {showUserAssignment && (
           <UserAssignment
@@ -197,9 +224,6 @@ function App() {
         <div className="btn-right">
           <input type="file" accept=".bpmn" onChange={(e) => loadDiagram(e.target.files[0])} />
         </div>
-        <Link to = '/form-editor'>
-        <button className="btn-mid">Camuda Form</button>
-        </Link>
       </div>
     </div>
   );

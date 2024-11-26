@@ -18,16 +18,16 @@ export class RangeField {
 function RangeRenderer(props) {
   console.info("Range Renderer Props", props);
 
-  //#region Constants
+
   const { disabled, errors = [], field, readonly, value } = props;
   const { description, range = {}, id, label } = field;
   const { min, max, step } = range;
   const { formId } = useContext(FormContext);
   const errorMessageId =
     errors.length === 0 ? undefined : `${prefixId(id, formId)}-error-message`;
-  //#endregion
 
-  //#region Events
+
+ 
   const onChange = ({ target }) => {
     console.log("Range event onChange", target);
     props.onChange({
@@ -58,14 +58,8 @@ function RangeRenderer(props) {
   </div>`;
 }
 
-//#region Configuration
-/*
- * This is the configuration part of the custom field. It defines
- * the schema type, UI label and icon, palette group, properties panel entries
- * and much more.
- */
+
 RangeRenderer.config = {
-  /* we can extend the default configuration of existing fields */
   ...Numberfield.config,
   type: "range",
   label: "Range",

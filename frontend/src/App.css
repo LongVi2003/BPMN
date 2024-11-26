@@ -8,7 +8,7 @@
   display: flex;
   margin-bottom: 20px;
   /* border: solid 1px black; */
-  height: 630px;
+  height: 550px;
   width: 120%;
 }
 .text{
@@ -22,7 +22,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-right:700px ;
+  margin-right:950px ;
 }
 
 .btn-left{
@@ -72,11 +72,12 @@
   margin-top: 20px;
 }
 .properties-panel{
-  height: 655px;
+  height: 550px;
   margin-right: 20px;
 }
 
 @media (max-width: 900px){
+
   .btn{
     flex-direction: column;
     justify-content: center;

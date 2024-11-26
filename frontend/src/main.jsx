@@ -1,16 +1,27 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.jsx';
+import { UserProvider } from './Login/UserContext.jsx';
 import "@bpmn-io/form-js/dist/assets/form-js.css";
 import "@bpmn-io/form-js/dist/assets/form-js-editor.css";
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import FormEditorComponent from './components/FormEditorComponent.jsx';
+import Login from './Login/Login.jsx';
+import Process from './Process/Process.jsx';
+import ProcessDetail from './ProcessDetail/ProcessDetail.jsx';
 
 createRoot(document.getElementById('root')).render(
-  <BrowserRouter>
-    <Routes>
-      <Route path="/" element={<App />} />
-      <Route path="/form-editor" element={<FormEditorComponent />} />
-    </Routes>
-  </BrowserRouter>
+  <UserProvider>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/dashboard" element={<App />} />
+        <Route path="/form-editor" element={<FormEditorComponent />} />
+        <Route path="/process" element={<Process />} />
+        {/* Redirect '/' to '/login' */}
+        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/processdetail/:id" element={<ProcessDetail />} />        
+      </Routes>
+    </BrowserRouter>
+  </UserProvider>
 );

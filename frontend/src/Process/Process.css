@@ -1,0 +1,55 @@
+  
+  .process-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    margin-top: 20px;
+  }
+  
+  .criteria-input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .process-list {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  
+  .process-list-header {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    background-color: #f9f9f9;
+    font-weight: bold;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .process-row {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .process-row img{
+    height: 20px;
+  }
+  .process-row button{
+    background-color: white !important;
+  }
+  
+  .process-row:last-child {
+    border-bottom: none;
+  }
+  
+  .process-footer {
+    margin-top: 20px;
+    font-size: 0.9em;
+    color: gray;
+    text-align: center;
+  }
+  
