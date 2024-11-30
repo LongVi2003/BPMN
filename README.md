@@ -7,7 +7,7 @@
 - Tính năng Camuda Form
 - Tính năng xuất và nhập file BPMN XML, lưu lại diagram và Deployed Diagram
 ## Yêu Cầu
-- **Node js**(phiên bản 14.x hoặc cao hơn)
+- **Node js** (phiên bản 14.x hoặc cao hơn)
 - **Docker** với Camuda Docker
 Đây là một dự án BPMN được xây dụng bằng bpmn-js chạy bằng API của Camuda Docker
 ## Tính Năng
