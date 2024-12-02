@@ -262,54 +262,39 @@ app.get('/process-definitions/:id', basicAuth, async (req, res) => {
 });
 
 
-app.get('/deployment/:deploymentId/diagram', basicAuth, async (req, res) => {
+app.get('/process-definition/:deploymentId/diagram', basicAuth, async (req, res) => {
   const { deploymentId } = req.params;
+  const CAMUNDA_API_URL = `http://localhost:8080/engine-rest/process-definition/${deploymentId}/xml`;
 
   try {
-    // Fetch resources of the deployment
-    const resourcesResponse = await fetch(
-      `http://localhost:8080/engine-rest/deployment/${deploymentId}/resources`,
-      {
-        headers: {
-          Authorization: 'Basic ' + Buffer.from('demo:demo').toString('base64'),
-        },
-      }
-    );
+    const response = await fetch(CAMUNDA_API_URL, {
+      headers: {
+        Authorization: 'Basic ' + Buffer.from('demo:demo').toString('base64'),
+      },
+    });
 
-    if (!resourcesResponse.ok) {
-      const errorText = await resourcesResponse.text();
-      return res.status(resourcesResponse.status).json({ error: errorText });
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Camunda API Error:', errorText);
+      return res.status(response.status).json({ error: errorText });
     }
 
-    const resources = await resourcesResponse.json();
-    const bpmnResource = resources.find((r) => r.name.endsWith('.bpmn'));
+    const { bpmn20Xml } = await response.json();
 
-    if (!bpmnResource) {
-      return res.status(404).json({ error: 'No BPMN diagram found in the deployment.' });
+    if (!bpmn20Xml) {
+      throw new Error('BPMN XML is missing in the response');
     }
 
-    // Fetch BPMN diagram data
-    const diagramResponse = await fetch(
-      `http://localhost:8080/engine-rest/deployment/${deploymentId}/resources/${bpmnResource.id}/data`,
-      {
-        headers: {
-          Authorization: 'Basic ' + Buffer.from('demo:demo').toString('base64'),
-        },
-      }
-    );
-
-    if (!diagramResponse.ok) {
-      const errorText = await diagramResponse.text();
-      return res.status(diagramResponse.status).json({ error: errorText });
-    }
-
-    const diagramXml = await diagramResponse.text();
     res.setHeader('Content-Type', 'application/xml');
-    res.send(diagramXml);
+    res.send(bpmn20Xml);
   } catch (error) {
+    console.error('Backend Error:', error.message);
     res.status(500).json({ error: error.message });
   }
 });
+
+
+
 
 
 
