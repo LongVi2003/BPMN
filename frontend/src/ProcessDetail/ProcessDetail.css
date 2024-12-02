@@ -93,4 +93,11 @@
     height: 400px; /* Điều chỉnh kích thước theo yêu cầu */
     overflow: hidden;
   }
+
+  .bpmn-container a{
+    display: none;
+  }
+  .bpmn-container :active{
+    cursor: grabbing;
+  }
   
