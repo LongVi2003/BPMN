@@ -100,4 +100,36 @@
   .bpmn-container :active{
     cursor: grabbing;
   }
+
+  table{
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+    font-size: 1rem;
+  }
+  table th, table td{
+    border-top: 1px solid #ccc;
+    padding: 5px;
+    text-align: left;
+  }
+  table th{
+    background-color: #f0f0f0;
+    font-style: bold;
+  }
+  table tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
   
+  table tr:hover {
+    background-color: #f1f1f1;
+  }
+  table img {
+    color: white;
+    
+    border-radius: 6px;
+    cursor: pointer;
+    margin-right: 10px;
+    font-size: 14px;
+    width: 20px;
+    height: 20px;
+  }
