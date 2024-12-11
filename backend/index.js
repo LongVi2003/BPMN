@@ -205,36 +205,6 @@ app.get('/process-definitions', basicAuth, async (req, res) => {
 });
 
 
-// app.delete('/process-definitions/:id', basicAuth, async (req, res) => {
-//   const { id } = req.params;
-//   const { cascade } = req.query; // Lấy query parameter để xác định xóa kiểu "cascade" hay không.
-//   const CAMUNDA_API_URL = `http://localhost:8080/engine-rest/process-definition/${id}`;
-//   const options = cascade === 'true' ? '?cascade=true' : '';
-
-//   try {
-//     const response = await fetch(CAMUNDA_API_URL + options, {
-//       method: 'DELETE',
-//       headers: {
-//         Authorization: 'Basic ' + Buffer.from('demo:demo').toString('base64'),
-//       },
-//     });
-
-//     if (response.ok) {
-//       res.status(200).json({ message: 'Process definition deleted successfully' });
-//     } else {
-//       const errorText = await response.text();
-//       res
-//         .status(response.status)
-//         .json({ message: 'Failed to delete process definition', error: errorText });
-//     }
-//   } catch (error) {
-//     res.status(500).json({ message: 'Error deleting process definition', error: error.message });
-//   }
-// });
-
-
-
-
 
 
 app.get('/process-definitions/:id', basicAuth, async (req, res) => {
@@ -294,10 +264,190 @@ app.get('/process-definition/:deploymentId/diagram', basicAuth, async (req, res)
 });
 
 
+app.delete('/process-definitions/:id', basicAuth, async (req, res) => {
+  const { id } = req.params;
+  const { cascade } = req.query; 
+  const CAMUNDA_API_URL = `http://localhost:8080/engine-rest/process-definition/${id}`;
+  const options = cascade === 'true' ? '?cascade=true' : '';
+
+  try {
+    const response = await fetch(CAMUNDA_API_URL + options, {
+      method: 'DELETE',
+      headers: {
+        Authorization: 'Basic ' + Buffer.from('demo:demo').toString('base64'),
+      },
+    });
+
+    if (response.ok) {
+      res.status(200).json({ message: 'Process definition deleted successfully' });
+    } else {
+      const errorText = await response.text();
+      res
+        .status(response.status)
+        .json({ message: 'Failed to delete process definition', error: errorText });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting process definition', error: error.message });
+  }
+});
+
+
+
+//get process instances
+app.get('/process-instances/:id', basicAuth, async (req, res) => {
+  const { id } = req.params; // This should be the process definition key
+
+  const CAMUNDA_API_URL = `http://localhost:8080/engine-rest/process-instance?processDefinitionId=${id}`; // Use ID
+
+  try {
+    const response = await fetch(CAMUNDA_API_URL, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Basic ' + Buffer.from('demo:demo').toString('base64'),
+      },
+    });
+
+    if (response.ok) {
+      const processInstances = await response.json();
+      res.status(200).json({
+        message: 'Process instances retrieved successfully',
+        data: processInstances,
+      });
+    } else {
+      const errorText = await response.text();
+      res.status(response.status).json({
+        message: 'Error retrieving process instances',
+        error: errorText,
+      });
+    }
+  } catch (error) {
+    console.error('Error fetching process instances:', error);
+    res.status(500).json({ message: 'Error fetching process instances', error });
+  }
+});
+
+app.delete('/process-instances/:id', async (req, res) => {
+  const { id } = req.params;
+  const cascade = req.query.cascade === 'true';
+  const options = cascade ? '?cascade=true' : '';
+
+  try {
+    const response = await fetch(`http://localhost:8080/engine-rest/process-instance/${id}${options}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: 'Basic ' + Buffer.from('demo:demo').toString('base64'),
+      },
+    });
+
+    if (response.ok) {
+      res.status(200).json({ message: 'Process instance đã xóa thành công' });
+    } else {
+      const errorText = await response.text();
+      res.status(response.status).json({ message: 'Error xóa process instance', error: errorText });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Error xóa process instance', error: error.message });
+  }
+});
 
 
 
 
+app.get('/variable-instance/:id', async (req, res) => {
+  const { id } = req.params;
+  const CAMUNDA_API_URL = `http://localhost:8080/engine-rest/variable-instance?processInstanceId=${id}`;
+
+  try {
+    const response = await fetch(CAMUNDA_API_URL, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Basic ' + Buffer.from('demo:demo').toString('base64'),
+      },
+    });
+
+    if (response.ok) {
+      const variableInstances = await response.json();
+      const groupedVariables = variableInstances.reduce((acc, variable) => {
+        const { processInstanceId } = variable;
+        if (!acc[processInstanceId]) acc[processInstanceId] = [];
+        acc[processInstanceId].push(variable);
+        return acc;
+      }, {});
+
+      res.status(200).json({
+        message: 'Variables retrieved successfully',
+        data: groupedVariables, // Dữ liệu được nhóm theo processInstanceId
+      });
+    } else {
+      const errorText = await response.text();
+      res.status(response.status).json({
+        message: 'Error retrieving variables',
+        error: errorText,
+      });
+    }
+  } catch (error) {
+    console.error('Error fetching variable instances:', error);
+    res.status(500).json({ message: 'Error fetching variable instances', error });
+  }
+});
+
+
+
+
+app.put('/variable-instance/:instanceId/:variableName', basicAuth, async (req, res) => {
+  const { instanceId, variableName } = req.params;
+  const { type, value } = req.body;
+
+  if (!type || value === undefined) {
+    return res.status(400).json({ error: 'Type and value are required' });
+  }
+
+  try {
+    const response = await fetch(
+      `http://localhost:8080/engine-rest/process-instance/${instanceId}/variables/${variableName}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: req.headers.authorization,
+        },
+        body: JSON.stringify({ type, value }),
+      }
+    );
+
+    if (response.ok) {
+      res.status(200).json({ message: 'Variable updated successfully' });
+    } else {
+      const errorText = await response.text();
+      res.status(response.status).json({ error: errorText });
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+app.delete('/variable-instance/:instanceId/:variableName', basicAuth, async (req, res) => {
+  const { instanceId, variableName } = req.params;
+
+  try {
+    const response = await fetch(`http://localhost:8080/engine-rest/process-instance/${instanceId}/variables/${variableName}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: req.headers.authorization,
+      },
+    });
+
+    if (response.ok) {
+      res.status(200).json({ message: 'Variable deleted successfully' });
+    } else {
+      const errorText = await response.text();
+      res.status(response.status).json({ error: errorText });
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 
 

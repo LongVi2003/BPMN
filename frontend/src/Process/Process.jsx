@@ -27,30 +27,31 @@ const Process = () => {
     }
   };
 
-  // const deleteProcessById = async (id) => {
-  //   try {
-  //     const response = await fetch(
-  //       `http://localhost:3000/process-definitions/${id}?cascade=true`,
-  //       {
-  //         method: 'DELETE',
-  //         headers: {
-  //           Authorization: 'Basic ' + btoa('demo:demo'),
-  //         },
-  //       }
-  //     );
+  const deleteProcessById = async (id) => {
+    try {
+    const response = await fetch(
+         `http://localhost:3000/process-definitions/${id}?cascade=true`,
+         {
+          method: 'DELETE',
+           headers: {
+             Authorization: 'Basic ' + btoa('demo:demo'),
+          },
+        }
+       );
 
-  //     if (response.ok) {
-  //       setProcessDefinition((prevDefinitions) =>
-  //         prevDefinitions.filter((process) => process.id !== id)
-  //       );
-  //     } else {
-  //       const errorText = await response.text();
-  //       console.error('Error deleting process definition:', errorText);
-  //     }
-  //   } catch (error) {
-  //     console.error('Error:', error);
-  //   }
-  // };
+       if (response.ok) {
+        setProcessDefinition((prevDefinitions) =>
+          prevDefinitions.filter((process) => process.id !== id)
+         );
+         alert("Xóa thành công Process Definition");
+    } else {
+         const errorText = await response.text();
+         console.error('Error deleting process definition:', errorText);
+       }
+     } catch (error) {
+       console.error('Error:', error);
+     }
+ };
 
   useEffect(() => {
     fetchProcessDefinition();
@@ -87,9 +88,9 @@ const Process = () => {
             <Link to={`/processdetail/${process.id}`}>
               <div>{process.name}</div>
             </Link>
-            {/* <button onClick={() => deleteProcessById(process.id)}>
+             <button onClick={() => deleteProcessById(process.id)}>
               <img src={deleteIcon} alt="delete" />
-            </button> */}
+            </button> 
           </div>
         ))}
       </div>
