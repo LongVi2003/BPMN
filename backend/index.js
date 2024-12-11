@@ -353,6 +353,101 @@ app.delete('/process-instances/:id', async (req, res) => {
 
 
 
+app.get('/variable-instance/:id', async (req, res) => {
+  const { id } = req.params;
+  const CAMUNDA_API_URL = `http://localhost:8080/engine-rest/variable-instance?processInstanceId=${id}`;
+
+  try {
+    const response = await fetch(CAMUNDA_API_URL, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Basic ' + Buffer.from('demo:demo').toString('base64'),
+      },
+    });
+
+    if (response.ok) {
+      const variableInstances = await response.json();
+      const groupedVariables = variableInstances.reduce((acc, variable) => {
+        const { processInstanceId } = variable;
+        if (!acc[processInstanceId]) acc[processInstanceId] = [];
+        acc[processInstanceId].push(variable);
+        return acc;
+      }, {});
+
+      res.status(200).json({
+        message: 'Variables retrieved successfully',
+        data: groupedVariables, // Dữ liệu được nhóm theo processInstanceId
+      });
+    } else {
+      const errorText = await response.text();
+      res.status(response.status).json({
+        message: 'Error retrieving variables',
+        error: errorText,
+      });
+    }
+  } catch (error) {
+    console.error('Error fetching variable instances:', error);
+    res.status(500).json({ message: 'Error fetching variable instances', error });
+  }
+});
+
+
+
+
+app.put('/variable-instance/:instanceId/:variableName', basicAuth, async (req, res) => {
+  const { instanceId, variableName } = req.params;
+  const { type, value } = req.body;
+
+  if (!type || value === undefined) {
+    return res.status(400).json({ error: 'Type and value are required' });
+  }
+
+  try {
+    const response = await fetch(
+      `http://localhost:8080/engine-rest/process-instance/${instanceId}/variables/${variableName}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: req.headers.authorization,
+        },
+        body: JSON.stringify({ type, value }),
+      }
+    );
+
+    if (response.ok) {
+      res.status(200).json({ message: 'Variable updated successfully' });
+    } else {
+      const errorText = await response.text();
+      res.status(response.status).json({ error: errorText });
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+app.delete('/variable-instance/:instanceId/:variableName', basicAuth, async (req, res) => {
+  const { instanceId, variableName } = req.params;
+
+  try {
+    const response = await fetch(`http://localhost:8080/engine-rest/process-instance/${instanceId}/variables/${variableName}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: req.headers.authorization,
+      },
+    });
+
+    if (response.ok) {
+      res.status(200).json({ message: 'Variable deleted successfully' });
+    } else {
+      const errorText = await response.text();
+      res.status(response.status).json({ error: errorText });
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 
 

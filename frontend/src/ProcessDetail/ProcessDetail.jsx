@@ -19,6 +19,8 @@ const ProcessDetail = () => {
   const [processInstances, setProcessInstances] = useState([]);
   const bpmnContainerRef = useRef(null);
   const viewerRef = useRef(null);
+  const [variables, setVariables] = useState([]);
+  const [selectedInstance, setSelectedInstance] = useState(null);
 
   useEffect(() => {
     const fetchProcessDetail = async () => {
@@ -83,6 +85,9 @@ const ProcessDetail = () => {
     }
   }, [processDetail, id]);
 
+
+  
+
   useEffect(() => {
     const fetchInstances = async () => {
       try {
@@ -106,6 +111,28 @@ const ProcessDetail = () => {
   
     if (processDetail?.id) fetchInstances(); 
   }, [processDetail?.id]);
+
+  const fetchVariables = async (instanceId) => {
+    try {
+      const response = await fetch(`http://localhost:3000/variable-instance/${instanceId}`, {
+        headers: {
+          Authorization: 'Basic ' + btoa('demo:demo'),
+        },
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        setVariables(data.data); // Data đã được nhóm theo processInstanceId
+        setSelectedInstance(instanceId);
+      } else {
+        const errorText = await response.text();
+        console.error('Error fetching variables:', errorText);
+      }
+    } catch (error) {
+      console.error('Error:', error.message);
+    }
+  };
+  
   
 
 
@@ -114,6 +141,8 @@ const ProcessDetail = () => {
     const date = new Date(dateTimeString);
     return date.toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   }
+
+  
 
   const deleteProcessIntancesById = async (instanceId) => {
     try {
@@ -136,32 +165,137 @@ const ProcessDetail = () => {
     }
   };
 
+
+
+
+  const editVariable = async (variableName, newType, newValue) => {
+    try {
+      // Attempt to parse newValue into the appropriate type
+      let parsedValue = newValue;
+      if (newType === 'Double') {
+        parsedValue = parseFloat(newValue);
+        if (isNaN(parsedValue)) {
+          alert('Invalid value for type Double');
+          return;
+        }
+      } else if (newType === 'Integer') {
+        parsedValue = parseInt(newValue, 10);
+        if (isNaN(parsedValue)) {
+          alert('Invalid value for type Integer');
+          return;
+        }
+      }
+  
+      const response = await fetch(`http://localhost:3000/variable-instance/${selectedInstance}/${variableName}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Basic ' + btoa('demo:demo'),
+        },
+        body: JSON.stringify({ type: newType, value: parsedValue }),
+      });
+  
+      if (response.ok) {
+        alert('Variable updated successfully');
+        fetchVariables(selectedInstance); // Refresh the variables
+      } else {
+        const errorText = await response.text();
+        console.error('Error updating variable:', errorText);
+      }
+    } catch (err) {
+      console.error('Error:', err.message);
+    }
+  };
+  
+  
+  const deleteVariable = async (variableName) => {
+    try {
+      const response = await fetch(`http://localhost:3000/variable-instance/${selectedInstance}/${variableName}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: 'Basic ' + btoa('demo:demo'),
+        },
+      });
+  
+      if (response.ok) {
+        alert('Variable deleted successfully');
+        fetchVariables(selectedInstance); // Refresh the variables
+      } else {
+        const errorText = await response.text();
+        console.error('Error deleting variable:', errorText);
+      }
+    } catch (err) {
+      console.error('Error:', err.message);
+    }
+  };
+  
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'instances':
         return instances.length ? (
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Start Time</th>
-                <th>Business Key</th>
-                <th>Delete</th>
-              </tr>
-            </thead>
-            <tbody>
-              {instances.map((instance) => (
-                <tr key={instance.id}>
-                  <td>{instance.id}</td>
-                  <td>{formatDateTime(instance.startTime)}</td>
-                  <td>{instance.businessKey }</td>
-                  <td>
-                    <img src={deleteIcon} alt="Delete" onClick={() => deleteProcessIntancesById(instance.id)} />
-                  </td>
+          <>
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Start Time</th>
+                  <th>Business Key</th>
+                  <th>Delete</th>
                 </tr>
+              </thead>
+              <tbody>
+                {instances.map((instance) => (
+                  <tr key={instance.id}>
+                    <td
+                      onClick={() => fetchVariables(instance.id)}
+                      style={{ cursor: 'pointer', color: 'blue' }}
+                    >
+                      {instance.id}
+                    </td>
+                    <td>{formatDateTime(instance.startTime)}</td>
+                    <td>{instance.businessKey || 'N/A'}</td>
+                    <td>
+                      <img src={deleteIcon} alt="Delete" onClick={() => deleteProcessIntancesById(instance.id)} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {selectedInstance && (
+              <div>
+              {Object.entries(variables).map(([processInstanceId, variableList]) => (
+                <div key={processInstanceId}>
+                  <h3>Process Instance ID: {processInstanceId}</h3>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Value</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {variableList.map((variable) => (
+                        <tr key={variable.id}>
+                          <td>{variable.name}</td>
+                          <td><input type="text" defaultValue={variable.type} onBlur={(e) => editVariable(variable.name, e.target.value, variable.value)} /></td>
+                          <td><input type="text" defaultValue={JSON.stringify(variable.value)} onBlur={(e) => editVariable(variable.name, variable.type, e.target.value)} /></td>
+                          <td>
+                          <button>Edit</button>
+                          <img src={deleteIcon} alt="" onClick={(e) => deleteVariable(variable.name)} />
+                        </td>
+                        </tr>
+                      ))}   
+                    </tbody>
+                  </table>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+            )}
+          </>
         ) : (
           <p>No process instances matched by current filter.</p>
         );

@@ -125,7 +125,7 @@
   }
   table img {
     color: white;
-    
+    border: none;
     border-radius: 6px;
     cursor: pointer;
     margin-right: 10px;
