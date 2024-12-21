@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useUser } from '../Login/UserContext';
 import './UserAssignment.css';
+import nextArrow from '../assets/next.png';
 
 function UserAssignment() {
+  const [view, setView] = useState('UserAssignment'); // State to toggle views
   const [assignee, setAssignee] = useState('');
   const [candidateGroups, setCandidateGroups] = useState('');
   const [candidateUsers, setCandidateUsers] = useState('');
@@ -10,6 +12,12 @@ function UserAssignment() {
   const [followUpDate, setFollowUpDate] = useState('');
   const [priority, setPriority] = useState('');
   const { user, assignees, setAssignees } = useUser();
+  const [isTransitioning, setIsTransitioning] = useState(false); // For smooth transitions
+  const [selectedForm, setSelectedForm] = useState(''); // Selected form key
+  const [forms, setForms] = useState([]); // State for forms
+
+
+
 
   // Fetch danh sách Assignee
   useEffect(() => {
@@ -32,6 +40,30 @@ function UserAssignment() {
 
     fetchAssignees();
   }, [user, setAssignees]);
+
+  useEffect(() => {
+    const fetchForms = async () => {
+      try {
+        const response = await fetch('http://localhost:3000/forms', {
+          headers: { Authorization: 'Basic ' + btoa('demo:demo') },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch forms: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        setForms(data);
+      } catch (error) {
+        console.error('Error fetching forms:', error);
+      }
+    };
+
+    fetchForms();
+  }, []);
+  
+  
+
 
   // Gửi Assignee lên API
   const handleSave = async () => {
@@ -80,20 +112,46 @@ function UserAssignment() {
     }
   };
 
-  return (
-    <div className="user-assignment-panel">     
-        <label>Chọn Assignee:</label>
-        <select
-          onChange={(e) => handleSelectAssignee(e.target.value)}
-          value={assignee}
-        >
-          <option value="">Select Assignee</option>
-          {assignees.map((assignee, index) => (
-            <option key={index} value={assignee.assignee}>
-              {assignee.assignee}
-            </option>
-          ))}
-        </select>
+  const handleViewSwitch = (targetView) => {
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setView(targetView);
+      setIsTransitioning(false);
+    }, 500); // Match this with the CSS transition duration
+  };
+
+  const renderFormsView = () => (
+    <div className={`forms-panel ${isTransitioning ? 'hidden' : ''}`}>
+      <label>Type</label>
+      <select>
+        <option value="embedded">Embedded or External Task Form</option>
+      </select>
+      <label>Form Key:</label>
+      <select onChange={(e) => setSelectedForm(e.target.value)} value={selectedForm}>
+        <option value="">Select Form</option>
+        {forms.map((form, index) => (
+          <option key={index} value={form.key}>
+            {form.name} - ({form.key}) {/* Hiển thị tên process kèm form key */}
+          </option>
+        ))}
+      </select>
+      <button onClick={() => handleViewSwitch('UserAssignment')}>Back</button>
+    </div>
+  );
+
+  // UserAssignment view rendering
+  const renderUserAssignmentView = () => (
+    <div className={`user-assignment-panel ${isTransitioning ? 'hidden' : ''}`}>
+      <img src={nextArrow} alt="Next" onClick={() => handleViewSwitch('Forms')} />
+      <label>Chọn Assignee:</label>
+      <select onChange={(e) => handleSelectAssignee(e.target.value)} value={assignee}>
+        <option value="">Select Assignee</option>
+        {assignees.map((assignee, index) => (
+          <option key={index} value={assignee.assignee}>
+            {assignee.assignee}
+          </option>
+        ))}
+      </select>
       <label>Assignee:</label>
       <input type="text" value={assignee} onChange={(e) => setAssignee(e.target.value)} />
       <label>Candidate Groups:</label>
@@ -109,6 +167,8 @@ function UserAssignment() {
       <button onClick={handleSave}>Save</button>
     </div>
   );
+
+  return <>{view === 'UserAssignment' ? renderUserAssignmentView() : renderFormsView()}</>;
 }
 
 export default UserAssignment;

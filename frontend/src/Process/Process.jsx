@@ -28,30 +28,33 @@ const Process = () => {
   };
 
   const deleteProcessById = async (id) => {
-    try {
-    const response = await fetch(
-         `http://localhost:3000/process-definitions/${id}?cascade=true`,
-         {
-          method: 'DELETE',
-           headers: {
-             Authorization: 'Basic ' + btoa('demo:demo'),
-          },
-        }
-       );
-
-       if (response.ok) {
-        setProcessDefinition((prevDefinitions) =>
-          prevDefinitions.filter((process) => process.id !== id)
-         );
-         alert("Xóa thành công Process Definition");
-    } else {
-         const errorText = await response.text();
-         console.error('Error deleting process definition:', errorText);
-       }
-     } catch (error) {
-       console.error('Error:', error);
-     }
- };
+    const confirm = window.confirm('Are you sure you want to delete Process Definition?');
+    if(confirm){
+      try {
+        const response = await fetch(
+             `http://localhost:3000/process-definitions/${id}?cascade=true`,
+             {
+              method: 'DELETE',
+               headers: {
+                 Authorization: 'Basic ' + btoa('demo:demo'),
+              },
+            }
+           );
+    
+           if (response.ok) {
+            setProcessDefinition((prevDefinitions) =>
+              prevDefinitions.filter((process) => process.id !== id)
+             );
+             alert("Xóa thành công Process Definition");
+        } else {
+             const errorText = await response.text();
+             console.error('Error deleting process definition:', errorText);
+           }
+         } catch (error) {
+           console.error('Error:', error);
+         }
+     };
+    }
 
   useEffect(() => {
     fetchProcessDefinition();

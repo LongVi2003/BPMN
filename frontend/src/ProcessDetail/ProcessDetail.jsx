@@ -21,6 +21,7 @@ const ProcessDetail = () => {
   const viewerRef = useRef(null);
   const [variables, setVariables] = useState([]);
   const [selectedInstance, setSelectedInstance] = useState(null);
+  
 
   useEffect(() => {
     const fetchProcessDetail = async () => {
@@ -49,6 +50,7 @@ const ProcessDetail = () => {
   }, [id]);
 
   useEffect(() => {
+    
     if (processDetail) {
       const viewer = new BpmnJS({
         container: bpmnContainerRef.current,
@@ -112,9 +114,9 @@ const ProcessDetail = () => {
     if (processDetail?.id) fetchInstances(); 
   }, [processDetail?.id]);
 
-  const fetchVariables = async (instanceId) => {
+  const fetchVariables = async (processInstanceId) => {
     try {
-      const response = await fetch(`http://localhost:3000/variable-instance/${instanceId}`, {
+      const response = await fetch(`http://localhost:3000/variable-instance/${processInstanceId}`, {
         headers: {
           Authorization: 'Basic ' + btoa('demo:demo'),
         },
@@ -122,8 +124,10 @@ const ProcessDetail = () => {
   
       if (response.ok) {
         const data = await response.json();
-        setVariables(data.data); // Data đã được nhóm theo processInstanceId
-        setSelectedInstance(instanceId);
+        setVariables((prevVariables) => ({
+          ...prevVariables,
+          [processInstanceId]: data.data[processInstanceId] || [], // Lưu biến theo instance ID
+        }));
       } else {
         const errorText = await response.text();
         console.error('Error fetching variables:', errorText);
@@ -145,25 +149,28 @@ const ProcessDetail = () => {
   
 
   const deleteProcessIntancesById = async (instanceId) => {
-    try {
-      const response = await fetch(`http://localhost:3000/process-instances/${instanceId}?cascade=true`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: 'Basic ' + btoa('demo:demo'),
-        },
-      });
-
-      if (response.ok) {
-        setProcessInstances((prevInstances) => prevInstances.filter((instance) => instance.id !== instanceId));
-        alert('Xóa thành công Process Instance');
-      } else {
-        const errorText = await response.text();
-        console.error('Error deleting process instance:', errorText);
+    const confirmation = window.confirm(`Are you sure you want to delete this process?`)
+    if(confirmation) {
+      try {
+        const response = await fetch(`http://localhost:3000/process-instances/${instanceId}?cascade=true`, {
+          method: 'DELETE',
+          headers: {
+            Authorization: 'Basic ' + btoa('demo:demo'),
+          },
+        });
+  
+        if (response.ok) {
+          setProcessInstances((prevInstances) => prevInstances.filter((instance) => instance.id !== instanceId));
+          alert('Xóa thành công Process Instance');
+        } else {
+          const errorText = await response.text();
+          console.error('Error deleting process instance:', errorText);
+        }
+      } catch (error) {
+        console.error('Error:', error.message);
       }
-    } catch (error) {
-      console.error('Error:', error.message);
+    };
     }
-  };
 
 
 
@@ -209,23 +216,27 @@ const ProcessDetail = () => {
   
   
   const deleteVariable = async (variableName) => {
-    try {
-      const response = await fetch(`http://localhost:3000/variable-instance/${selectedInstance}/${variableName}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: 'Basic ' + btoa('demo:demo'),
-        },
-      });
-  
-      if (response.ok) {
-        alert('Variable deleted successfully');
-        fetchVariables(selectedInstance); // Refresh the variables
-      } else {
-        const errorText = await response.text();
-        console.error('Error deleting variable:', errorText);
+    const confirmation =  window.confirm(`Are you sure you want to delete this variable?`)
+
+    if (confirmation){
+      try {
+        const response = await fetch(`http://localhost:3000/variable-instance/${selectedInstance}/${variableName}`, {
+          method: 'DELETE',
+          headers: {
+            Authorization: 'Basic ' + btoa('demo:demo'),
+          },
+        });
+    
+        if (response.ok) {
+          alert('Variable deleted successfully');
+          fetchVariables(selectedInstance); // Refresh the variables
+        } else {
+          const errorText = await response.text();
+          console.error('Error deleting variable:', errorText);
+        }
+      } catch (err) {
+        console.error('Error:', err.message);
       }
-    } catch (err) {
-      console.error('Error:', err.message);
     }
   };
   
@@ -248,7 +259,10 @@ const ProcessDetail = () => {
                 {instances.map((instance) => (
                   <tr key={instance.id}>
                     <td
-                      onClick={() => fetchVariables(instance.id)}
+                      onClick={() => {
+                        setSelectedInstance(instance.id); // Lưu instance được chọn
+                        if (!variables[instance.id]) fetchVariables(instance.id); // Lấy biến nếu chưa có
+                      }}
                       style={{ cursor: 'pointer', color: 'blue' }}
                     >
                       {instance.id}
@@ -256,18 +270,22 @@ const ProcessDetail = () => {
                     <td>{formatDateTime(instance.startTime)}</td>
                     <td>{instance.businessKey || 'N/A'}</td>
                     <td>
-                      <img src={deleteIcon} alt="Delete" onClick={() => deleteProcessIntancesById(instance.id)} />
+                      <img
+                        src={deleteIcon}
+                        alt="Delete"
+                        onClick={() => deleteProcessIntancesById(instance.id)}
+                      />
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-
-            {selectedInstance && (
+  
+            {/* Hiển thị biến của instance được chọn */}
+            {selectedInstance && variables[selectedInstance] && (
               <div>
-              {Object.entries(variables).map(([processInstanceId, variableList]) => (
-                <div key={processInstanceId}>
-                  <h3>Process Instance ID: {processInstanceId}</h3>
+                <h3>Process Instance ID: {selectedInstance}</h3>
+                {variables[selectedInstance].length > 0 ? (
                   <table>
                     <thead>
                       <tr>
@@ -278,75 +296,66 @@ const ProcessDetail = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {variableList.map((variable) => (
+                      {variables[selectedInstance].map((variable) => (
                         <tr key={variable.id}>
                           <td>{variable.name}</td>
-                          <td><input type="text" defaultValue={variable.type} onBlur={(e) => editVariable(variable.name, e.target.value, variable.value)} /></td>
-                          <td><input type="text" defaultValue={JSON.stringify(variable.value)} onBlur={(e) => editVariable(variable.name, variable.type, e.target.value)} /></td>
                           <td>
-                          <button>Edit</button>
-                          <img src={deleteIcon} alt="" onClick={(e) => deleteVariable(variable.name)} />
-                        </td>
+                            <input
+                              type="text"
+                              defaultValue={variable.type}
+                              onBlur={(e) =>
+                                editVariable(variable.name, e.target.value, variable.value)
+                              }
+                            />
+                          </td>
+                          <td>
+                            <input
+                              type="text"
+                              defaultValue={JSON.stringify(variable.value)}
+                              onBlur={(e) =>
+                                editVariable(variable.name, variable.type, e.target.value)
+                              }
+                            />
+                          </td>
+                          <td>
+                            <button
+                              onClick={() =>
+                                editVariable(variable.name, variable.type, variable.value)
+                              }
+                            >
+                              Edit
+                            </button>
+                            <img
+                              src={deleteIcon}
+                              alt="Delete"
+                              onClick={() => deleteVariable(variable.name)}
+                            />
+                          </td>
                         </tr>
-                      ))}   
+                      ))}
                     </tbody>
                   </table>
-                </div>
-              ))}
-            </div>
+                ) : (
+                  <p>No variables found for this instance.</p>
+                )}
+              </div>
             )}
           </>
         ) : (
           <p>No process instances matched by current filter.</p>
         );
-      case 'incidents':
-        return incidents.length ? (
-          <ul>
-            {incidents.map((incident) => (
-              <li key={incident.id}>
-                Incident ID: {incident.id}, Message: {incident.message}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>No incidents found.</p>
-        );
-      case 'calledDefinitions':
-        return calledDefinitions.length ? (
-          <ul>
-            {calledDefinitions.map((definition) => (
-              <li key={definition.id}>
-                Definition ID: {definition.id}, Name: {definition.name || 'N/A'}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>No called process definitions found.</p>
-        );
-      case 'jobDefinitions':
-        return jobDefinitions.length ? (
-          <ul>
-            {jobDefinitions.map((job) => (
-              <li key={job.id}>
-                Job ID: {job.id}, Process Definition Key: {job.processDefinitionKey}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>No job definitions found.</p>
-        );
       default:
         return null;
     }
   };
-
+  
+  
   if (loading) return <div>Loading...</div>;
   if (error) return <div className="error">Error: {error}</div>;
-
   return (
     <div className="process-detail">
       <Navbar />
-      <div className="process-sidebar">
+      <div className="process-sidebar"> 
         <h4>Definition Version:</h4>
         <p>{processDetail?.version || 'N/A'}</p>
         <h4>Version Tag:</h4>
