@@ -64,3 +64,47 @@
 .assignee-select{
   padding-top: 20px;
 }
+
+.user-assignment-panel img{
+  height: 20px;
+  margin-left: 180px;
+}
+.forms-panel{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin: 5px;
+}
+.forms-panel select, 
+.forms-panel input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  margin-right: 50px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background-color: #fff;
+  font-size: 14px;
+  color: #333;
+  transition: border-color 0.3s ease;
+}
+.forms-panel label {
+  padding: 10px;
+}
+
+.user-assignment-panel,
+.forms-panel {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.hidden {
+  opacity: 0;
+  transform: translateY(-20px);
+}

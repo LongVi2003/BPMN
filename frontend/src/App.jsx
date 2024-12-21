@@ -215,7 +215,9 @@ function App() {
           />
         )}
         <div ref={bpmnContainer} className="container"></div>
-        <div ref={propertiesPanelContainer} className="properties-panel"></div>
+        <div ref={propertiesPanelContainer} className="properties-panel">
+          
+        </div>
       </div>
       <div className="btn">
         <div onClick={deployDiagram} className="btn-left"><img src={playbtn} alt="" /></div>

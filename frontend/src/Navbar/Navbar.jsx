@@ -24,6 +24,11 @@ const Navbar = () => {
           className={({ isActive }) => isActive ? 'active-link' : ''}>
           <div>Camuda Form</div>
         </NavLink>
+        <NavLink 
+          to='/on-leave' 
+          className={({ isActive }) => isActive ? 'active-link' : ''}>
+          <div>Đơn Xin Nghỉ Phép</div>
+        </NavLink>
       </div>
       {user ? (
         <div className='logout'>

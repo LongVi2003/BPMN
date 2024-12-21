@@ -7,6 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
+const { type } = require('os');
 
 const app = express();
 app.use(express.json());
@@ -21,6 +22,18 @@ mongoose.connect('mongodb+srv://nguyendu89000:longvi890@cluster0.yfvkr.mongodb.n
 
 const CAMUNDA_API_URL = 'http://localhost:8080/engine-rest/deployment/create';
 const CAMUNDA_TASK_API_URL = 'http://localhost:8080/engine-rest/task';
+
+
+const LeaveRequestSchema = new mongoose.Schema({
+  name: String,
+  email: String,
+  date: String,
+  time: String,
+  reason: String,
+  status: { type: String, default: 'Pending' },
+});
+
+const LeaveRequest = mongoose.model('LeaveRequest', LeaveRequestSchema);
 
 
 
@@ -141,6 +154,51 @@ app.get('/assignee', basicAuth, async (req, res) => {
 });
 
 
+
+app.post('/api/leave-request', async (req, res) => {
+  try {
+    const { name, email, date, time, reason } = req.body;
+    if (!name || !email || !date || !time || !reason) {
+      return res.status(400).json({ message: 'Vui lòng điền đầy đủ thông tin.' });
+    }
+    const newRequest = new LeaveRequest({ name, email, date, time, reason });
+    await newRequest.save();
+    res.status(201).json({ message: 'Đơn xin nghỉ phép đã được lưu.', request: newRequest });
+  } catch (error) {
+    console.error('Lỗi khi lưu đơn xin nghỉ phép:', error);
+    res.status(500).json({ message: 'Lỗi hệ thống. Vui lòng thử lại sau.' });
+  }
+});
+
+app.get('/api/leave-requests', async (req, res) => {
+  try {
+    const requests = await LeaveRequest.find().sort({ createdAt: -1 });
+    res.status(200).json(requests);
+  } catch (error) {
+    console.error('Lỗi khi lấy danh sách đơn xin nghỉ phép:', error);
+    res.status(500).json({ message: 'Lỗi hệ thống. Vui lòng thử lại sau.' });
+  }
+});
+
+app.patch('/api/leave-request/:id', async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  try {
+    const updatedRequest = await LeaveRequest.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true }
+    );
+    if (!updatedRequest) {
+      return res.status(404).json({ message: 'Đơn không tồn tại.' });
+    }
+    res.json(updatedRequest);
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi hệ thống.' });
+  }
+});
+
+
 app.post('/login',(req, res)=>{
   const {authorization} = req.headers;
   if(!authorization || !authorization.startsWith('Basic')){
@@ -155,6 +213,8 @@ app.post('/login',(req, res)=>{
     res.status(401).json({message: 'Tài khoản hoặc mật khẩu không đúng'});
   }
 });
+
+
 
 
 app.get('/process-definitions', basicAuth, async (req, res) => {
@@ -367,6 +427,8 @@ app.get('/variable-instance/:id', async (req, res) => {
 
     if (response.ok) {
       const variableInstances = await response.json();
+
+      // Nhóm dữ liệu theo processInstanceId
       const groupedVariables = variableInstances.reduce((acc, variable) => {
         const { processInstanceId } = variable;
         if (!acc[processInstanceId]) acc[processInstanceId] = [];
@@ -376,7 +438,7 @@ app.get('/variable-instance/:id', async (req, res) => {
 
       res.status(200).json({
         message: 'Variables retrieved successfully',
-        data: groupedVariables, // Dữ liệu được nhóm theo processInstanceId
+        data: groupedVariables, // Trả về danh sách biến đã được nhóm
       });
     } else {
       const errorText = await response.text();
@@ -390,6 +452,8 @@ app.get('/variable-instance/:id', async (req, res) => {
     res.status(500).json({ message: 'Error fetching variable instances', error });
   }
 });
+
+
 
 
 
@@ -539,6 +603,64 @@ app.post('/deploymentForm', upload.single('form'), async (req, res) => {
     fs.unlinkSync(filePath); 
   }
 });
+
+
+app.get('/forms', async (req, res) => {
+  try {
+    const camundaUrl = 'http://localhost:8080/engine-rest/process-definition'; // Lấy danh sách process definitions
+    const response = await fetch(camundaUrl, {
+      headers: {
+        Authorization: 'Basic ' + Buffer.from('demo:demo').toString('base64'),
+      },
+    });
+
+    if (!response.ok) {
+      console.error(`Failed to fetch process definitions: ${response.statusText}`);
+      return res.status(response.status).json({ message: 'Failed to fetch process definitions' });
+    }
+
+    const processDefinitions = await response.json();
+
+    // Lấy thông tin formKey từ từng process definition
+    const forms = await Promise.all(
+      processDefinitions.map(async (process) => {
+        try {
+          const startFormResponse = await fetch(
+            `http://localhost:8080/engine-rest/process-definition/${process.id}/startForm`,
+            {
+              headers: {
+                Authorization: 'Basic ' + Buffer.from('demo:demo').toString('base64'),
+              },
+            }
+          );
+
+          if (startFormResponse.ok) {
+            const { key } = await startFormResponse.json(); // API trả về { key: <formKey> }
+            return {
+              id: process.id,
+              key: key || 'Chưa có Form Key hiển thị', // Form key lấy từ endpoint
+              name: process.name || `Process ${process.id}`,
+            };
+          }
+        } catch (error) {
+          console.error(`Error fetching form key for process ${process.id}:`, error.message);
+          return null; // Nếu không lấy được form key thì trả null
+        }
+      })
+    );
+
+    // Lọc các giá trị null (nếu có lỗi xảy ra)
+    const filteredForms = forms.filter((form) => form !== null);
+
+    res.status(200).json(filteredForms);
+  } catch (error) {
+    console.error('Error fetching forms:', error.message);
+    res.status(500).json({ message: 'Error fetching forms', error: error.message });
+  }
+});
+
+
+
 
 app.listen(port, () => {
   console.log(`Server is running `);

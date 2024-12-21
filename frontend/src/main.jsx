@@ -9,6 +9,7 @@ import FormEditorComponent from './components/FormEditorComponent.jsx';
 import Login from './Login/Login.jsx';
 import Process from './Process/Process.jsx';
 import ProcessDetail from './ProcessDetail/ProcessDetail.jsx';
+import LeaveRequestForm from './LeaveRequestForm/LeaveRequestForm.jsx';
 
 createRoot(document.getElementById('root')).render(
   <UserProvider>
@@ -18,6 +19,7 @@ createRoot(document.getElementById('root')).render(
         <Route path="/dashboard" element={<App />} />
         <Route path="/form-editor" element={<FormEditorComponent />} />
         <Route path="/process" element={<Process />} />
+        <Route path="/on-leave" element={<LeaveRequestForm />} />
         {/* Redirect '/' to '/login' */}
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/processdetail/:id" element={<ProcessDetail />} />        

@@ -1,0 +1,90 @@
+.leave-request-form {
+    max-width: 650px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    overflow: auto;
+  }
+  
+  .leave-request-form h2 {
+    text-align: left;
+    margin-bottom: 20px;
+  }
+  
+  .leave-request-form form {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+  }
+  
+  .leave-request-form label {
+    margin-bottom: 10px;
+    font-weight: bold;
+  }
+  
+  .leave-request-form input,
+  .leave-request-form textarea {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .leave-request-form textarea {
+    height: 100px;
+  }
+  
+  .leave-request-form button {
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  .leave-request-form button:hover {
+    background-color: #0056b3;
+  }
+
+  .form-header{
+    justify-content: space-between;
+    display: flex;
+  }
+  .form-header img{
+    width: 20px;
+    height: 20px;
+  }
+  table{
+    border-radius: 8px;
+    margin-top: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    overflow: auto;
+  }
+
+  table th, table td{
+    border-top: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+  }
+  table th{
+    background-color: #f9f9f9;
+  }
+  table tr:nth-child(even) {background-color: #f2f2f2;}
+  table tr:hover {background-color: #ddd;}
+ 
+  button{
+    border-radius: 10px;
+    padding: 10px 15px;
+    cursor: pointer;
+  }
+  button:hover{
+    background-color: #0056b3;
+    color: white;
+  }
+  

@@ -107,4 +107,11 @@
 [data-group-id="group-CamundaPlatform__UserAssignment"] {
   display: none;
 }
+.bio-properties-panel{
+  text-align: left;
+}
+[data-group-id="group-CamundaPlatform__Form"] {
+  display: none;
+}
+
 
