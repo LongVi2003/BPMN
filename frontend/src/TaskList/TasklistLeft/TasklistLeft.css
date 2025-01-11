@@ -1,0 +1,40 @@
+.side-left{
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    height: 680px;
+    width: 200px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: left;
+    transition: width 0.3s ease;
+    overflow: hidden;
+
+}
+.side-header{
+    display: flex;
+    justify-content: space-between;
+    background-color: #f6f5f5;
+    padding: 10px 20px;
+    border: 1px solid #eaeaea;
+    border-radius: 4px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    margin-bottom: 10px;
+}
+.side-body{
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 20px;
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-left: 4px solid #f63c3c;
+}
+
+.side-left.closed{
+    width: 50px;
+}
+.side-left.open{
+    width: 200px;
+}
+

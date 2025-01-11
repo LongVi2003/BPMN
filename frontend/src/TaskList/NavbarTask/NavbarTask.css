@@ -1,0 +1,132 @@
+.navbartask{
+    display: flex;
+    justify-content: space-between; 
+    align-items: center;
+    padding: 10px 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.navbartask-left div{
+    font-size: 20px;
+    font-style: bold;
+    font-weight: 400;
+}
+.navbar-right{
+    display: flex;
+    gap: 20px;
+    justify-content: space-between;
+}
+.startprocessintance{
+    padding: 5px;
+    border-right: 1px solid #000000;
+    cursor: pointer;
+}
+.startprocessintance:hover{
+    background-color: #f9f9f9;
+    transform: translateY(-2px);
+}
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Modal Box */
+.modal {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 800px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Modal Header */
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #e7e2e2;
+  }
+  
+  /* Title Styling */
+  .modal-title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-right: 200px; 
+    flex-shrink: 0; 
+
+  }
+  
+  /* Input Styling */
+  .process-search {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  
+/* Process List */
+.process-list {
+  max-height: 200px;
+  overflow-y: auto;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.process-item {
+  padding: 10px;
+  margin: 5px 0;
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.process-item:hover {
+  background: #ececec;
+}
+
+.close-modal {
+  border: none;
+  color: rgb(59, 159, 240);
+  cursor: pointer;
+  text-align: right;
+
+}
+.pp{
+    padding: 10px;
+    text-align: left;
+    font-size: 13px;
+}
+.button-container{
+  display: flex;
+  gap: 20px;
+  margin-left: 80%;
+}
+.button-container p{
+  border: none;
+  color: rgb(59, 159, 240);
+  cursor: pointer;
+  text-align: right;
+  margin-top: 10px;
+}
+
+.button-container button {
+  padding: 10px 20px;
+}
+.form-task-process{
+  box-shadow: none;
+  background-color: white;
+  border: none;
+}

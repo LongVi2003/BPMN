@@ -1,3 +1,4 @@
+import React from 'react'; // Thêm dòng này
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.jsx';
@@ -9,21 +10,23 @@ import FormEditorComponent from './components/FormEditorComponent.jsx';
 import Login from './Login/Login.jsx';
 import Process from './Process/Process.jsx';
 import ProcessDetail from './ProcessDetail/ProcessDetail.jsx';
-import LeaveRequestForm from './LeaveRequestForm/LeaveRequestForm.jsx';
+import TaskList from './TaskList/TaskList.jsx';
 
 createRoot(document.getElementById('root')).render(
-  <UserProvider>
-    <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/dashboard" element={<App />} />
-        <Route path="/form-editor" element={<FormEditorComponent />} />
-        <Route path="/process" element={<Process />} />
-        <Route path="/on-leave" element={<LeaveRequestForm />} />
-        {/* Redirect '/' to '/login' */}
-        <Route path="/" element={<Navigate to="/login" />} />
-        <Route path="/processdetail/:id" element={<ProcessDetail />} />        
-      </Routes>
-    </BrowserRouter>
-  </UserProvider>
+  <StrictMode>
+    <UserProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/dashboard" element={<App />} />
+          <Route path="/form-editor" element={<FormEditorComponent />} />
+          <Route path="/process" element={<Process />} />
+          <Route path="/task-list" element={<TaskList />} />
+          {/* Redirect '/' to '/login' */}
+          <Route path="/" element={<Navigate to="/login" />} />
+          <Route path="/processdetail/:id" element={<ProcessDetail />} />
+        </Routes>
+      </BrowserRouter>
+    </UserProvider>
+  </StrictMode>
 );

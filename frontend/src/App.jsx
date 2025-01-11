@@ -33,7 +33,7 @@ function App() {
   const hasChanges = useRef(false);
   const [showUserAssignment, setShowUserAssignment] = useState(false);
   const [selectedElement, setSelectedElement] = useState(null);
-
+  const [showOptions, setShowOptions] = useState(false);
 
 
   const saveToLocalStorage = async () => {
@@ -128,6 +128,16 @@ function App() {
       alert('Gặp lỗi khi Deployed. Vui lòng thử lại.');
     }
   };
+
+
+  const handleOptionClick = (option) =>{
+    if(option ==='deploy'){
+      deployDiagram();
+    }else if (option ==='startProcessIntance'){
+      alert('Start process');
+    }
+    setShowOptons(false);
+  }
   
 
   useEffect(() => {
@@ -220,7 +230,15 @@ function App() {
         </div>
       </div>
       <div className="btn">
-        <div onClick={deployDiagram} className="btn-left"><img src={playbtn} alt="" /></div>
+      <div onClick={() => setShowOptions((prev) => !prev)} className="btn-left">
+          <img src={playbtn} alt="Deploy" />
+        </div>
+        {showOptions && (
+          <div className="options-menu">
+            <div onClick={() => handleOptionClick('deploy')}>Deploy</div>
+            <div onClick={() => handleOptionClick('startProcessIntance')}>Start Process Intance</div>
+          </div>
+        )}
         <div onClick={saveDiagram} className="btn-left"><img src={download} alt="" /></div>
         <div onClick={createNewDiagram} className="btn-mid"><img src={addBtn} alt="" /></div>
         <div className="btn-right">
