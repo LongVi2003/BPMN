@@ -18,8 +18,8 @@
 - Tính năng xuất và nhập file BPMN XML, lưu lại diagram và Deployed Diagram
 ## Yêu Cầu
 - **Node js** (phiên bản 14.x hoặc cao hơn)
-- **Docker**  (docker pull camunda/camunda-bpm-platform:run-latest
-               docker run -d --name camunda -p 8080:8080 camunda/camunda-bpm-platform:run-latest)
+- **Docker**  (- docker pull camunda/camunda-bpm-platform:run-latest
+               - docker run -d --name camunda -p 8080:8080 camunda/camunda-bpm-platform:run-latest)
 ## Cách Chạy Dự Án
 - npm install
 - npm run dev (frontend)
