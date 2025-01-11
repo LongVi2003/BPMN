@@ -148,9 +148,11 @@ const FormEditorComponent = () => {
   }, []);
 
   return (
+    
     <div>
-      <Navbar />
-      <div id="form-editor"></div>
+       <Navbar />
+      <div id="form-editor">
+      </div>
       <div className="btn1">
         <div onClick={deployForm} className="btn-left"><img src={playbtn} alt="" /></div>
         <div onClick={downloadForm} className="btn-left">

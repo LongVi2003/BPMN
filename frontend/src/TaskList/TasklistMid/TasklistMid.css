@@ -1,0 +1,49 @@
+.side-mid{
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    height: 680px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: left;
+    transition: width 0.3s ease;
+    overflow: hidden;
+}
+.sidemid-header{
+    display: flex;
+    background-color: #f6f5f5;
+    padding: 10px 20px;
+    border: 1px solid #eaeaea;
+    border-radius: 4px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    margin-bottom: 10px;
+}
+.side-mid.closed {
+    width: 30px;
+    opacity: 0.8;
+  }
+  
+.side-mid.open {
+    width: 450px;
+    opacity: 1;
+}
+.gettasklist{
+  padding: 10px 20px;
+  overflow-y: auto;
+  max-height: 600px;
+}
+
+.gettasklist ul{
+   list-style: none;
+   padding: 0;
+   cursor: pointer;
+}
+.gettasklist li{
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.gettasklist li:hover{
+  background-color: #f9f9f9;
+  transform: translateY(-2px);
+}

@@ -74,6 +74,7 @@
 .properties-panel{
   height: 550px;
   margin-right: 20px;
+  margin-top: 50px;
 }
 
 @media (max-width: 900px){
@@ -112,6 +113,24 @@
 }
 [data-group-id="group-CamundaPlatform__Form"] {
   display: none;
+}
+.options-menu {
+  position: absolute;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 8px;
+  margin-top: -150px;
+}
+
+.options-menu div {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.options-menu div:hover {
+  background: #f0f0f0;
 }
 
 

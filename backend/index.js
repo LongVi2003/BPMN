@@ -11,7 +11,8 @@ const { type } = require('os');
 
 const app = express();
 app.use(express.json());
-app.use(cors()); 
+app.use(cors({ origin: 'http://localhost:5173' }));
+ 
 const upload = multer({ dest: 'uploads/' });
 const port = 3000;
 
@@ -95,53 +96,7 @@ app.post('/assignee', basicAuth, async (req, res) => {
   }
 });
 
-app.post('/sync-user-assignments', basicAuth, async (req, res) => {
-  try {
-    const assignees = await Assignee.find();
 
-    if (!assignees.length) {
-      return res.status(404).json({ message: 'No assignees found for synchronization' });
-    }
-
-    const syncResults = [];
-
-    for (const assignee of assignees) {
-      const payload = {
-        assignee: assignee.assignee,
-        candidateGroups: assignee.candidateGroups?.split(',') || [],
-        candidateUsers: assignee.candidateUsers?.split(',') || [],
-        dueDate: assignee.dueDate ? assignee.dueDate.toISOString() : null,
-        followUpDate: assignee.followUpDate ? assignee.followUpDate.toISOString() : null,
-        priority: assignee.priority,
-      };
-
-      try {
-        const response = await fetch(`${CAMUNDA_TASK_API_URL}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: 'Basic ' + btoa('demo:demo'),
-          },
-          body: JSON.stringify(payload),
-        });
-
-        if (response.ok) {
-          const result = await response.json();
-          syncResults.push({ assignee: assignee.assignee, status: 'success', result });
-        } else {
-          const errorText = await response.text();
-          syncResults.push({ assignee: assignee.assignee, status: 'error', error: errorText });
-        }
-      } catch (error) {
-        syncResults.push({ assignee: assignee.assignee, status: 'error', error: error.message });
-      }
-    }
-
-    res.status(200).json({ message: 'Synchronization completed', results: syncResults });
-  } catch (error) {
-    res.status(500).json({ message: 'Error during synchronization', error });
-  }
-});
 
 
 app.get('/assignee', basicAuth, async (req, res) => {
@@ -153,50 +108,6 @@ app.get('/assignee', basicAuth, async (req, res) => {
   }
 });
 
-
-
-app.post('/api/leave-request', async (req, res) => {
-  try {
-    const { name, email, date, time, reason } = req.body;
-    if (!name || !email || !date || !time || !reason) {
-      return res.status(400).json({ message: 'Vui lòng điền đầy đủ thông tin.' });
-    }
-    const newRequest = new LeaveRequest({ name, email, date, time, reason });
-    await newRequest.save();
-    res.status(201).json({ message: 'Đơn xin nghỉ phép đã được lưu.', request: newRequest });
-  } catch (error) {
-    console.error('Lỗi khi lưu đơn xin nghỉ phép:', error);
-    res.status(500).json({ message: 'Lỗi hệ thống. Vui lòng thử lại sau.' });
-  }
-});
-
-app.get('/api/leave-requests', async (req, res) => {
-  try {
-    const requests = await LeaveRequest.find().sort({ createdAt: -1 });
-    res.status(200).json(requests);
-  } catch (error) {
-    console.error('Lỗi khi lấy danh sách đơn xin nghỉ phép:', error);
-    res.status(500).json({ message: 'Lỗi hệ thống. Vui lòng thử lại sau.' });
-  }
-});
-
-app.patch('/api/leave-request/:id', async (req, res) => {
-  const { id } = req.params;
-  const { status } = req.body;
-  try {
-    const updatedRequest = await LeaveRequest.findByIdAndUpdate(
-      id,
-      { status },
-      { new: true }
-    );
-    if (!updatedRequest) {
-      return res.status(404).json({ message: 'Đơn không tồn tại.' });
-    }
-    res.json(updatedRequest);
-  } catch (error) {
-    res.status(500).json({ message: 'Lỗi hệ thống.' });
-  }
-});
 
 
 app.post('/login',(req, res)=>{
@@ -213,8 +124,6 @@ app.post('/login',(req, res)=>{
     res.status(401).json({message: 'Tài khoản hoặc mật khẩu không đúng'});
   }
 });
-
-
 
 
 app.get('/process-definitions', basicAuth, async (req, res) => {
@@ -263,9 +172,6 @@ app.get('/process-definitions', basicAuth, async (req, res) => {
     res.status(500).json({ message: '', error: err.message });
   }
 });
-
-
-
 
 app.get('/process-definitions/:id', basicAuth, async (req, res) => {
   const { id } = req.params;
@@ -659,6 +565,73 @@ app.get('/forms', async (req, res) => {
   }
 });
 
+
+app.get('/tasks', async (req, res) => {
+  try {
+    const response = await fetch(CAMUNDA_TASK_API_URL); // URL Camunda Task API
+    if (!response.ok) {
+      throw new Error(`Camunda API Error: ${response.statusText}`);
+    }
+
+    const tasks = await response.json();
+
+    const enrichedTasks = await Promise.all(
+      tasks.map(async (task) => {
+        const processDefinitionUrl = `http://localhost:8080/engine-rest/process-definition/${task.processDefinitionId}`;
+        const formKeyUrl = `http://localhost:8080/engine-rest/task/${task.id}/form`;
+
+        let processKey = 'UnKey';
+        let formKey = null;
+
+        // Fetch process definition key
+        const processResponse = await fetch(processDefinitionUrl);
+        if (processResponse.ok) {
+          const processDefinition = await processResponse.json();
+          processKey = processDefinition.key || 'UnKey';
+        }
+
+        // Fetch form key
+        const formResponse = await fetch(formKeyUrl);
+        if (formResponse.ok) {
+          const formData = await formResponse.json();
+          formKey = formData.key || null;
+        }
+
+        return {
+          id: task.id,
+          name: task.name,
+          key: processKey,
+          formKey: formKey, // Include form key
+          created: task.created || null,
+        };
+      })
+    );
+
+    res.status(200).json(enrichedTasks);
+  } catch (error) {
+    console.error('Error fetching tasks:', error.message);
+    res.status(500).json({ error: 'Failed to fetch tasks' });
+  }
+});
+
+app.get('/tasks-variable/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const formVariablesUrl = `http://localhost:8080/engine-rest/process-definition/${id}/form-variables`;
+
+    const response = await fetch(formVariablesUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch form variables: ${response.statusText}`);
+    }
+
+    const formVariables = await response.json();
+    res.status(200).json({ formVariables });
+  } catch (error) {
+    console.error('Error fetching form variables:', error.message);
+    res.status(500).json({ error: 'Failed to fetch form variables' });
+  }
+});
 
 
 
