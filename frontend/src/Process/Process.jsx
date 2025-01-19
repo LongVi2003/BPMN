@@ -68,7 +68,7 @@ const Process = () => {
         <input type="text" placeholder="Add criteria" className="criteria-input" />
       </header>
 
-      <div className="process-list">
+      <div className="process-list-definitions">
         <div className="process-list-header">
           <div>State</div>
           <div>Incidents</div>

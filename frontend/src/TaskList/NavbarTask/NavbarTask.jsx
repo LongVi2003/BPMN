@@ -74,7 +74,7 @@ const NavbarTask = () => {
       });
 
       if (response.ok) {
-        alert(`Process ${selectedProcess} started successfully!`);
+        alert(`Tạo ${selectedProcess} thành công!`);
         closeFormModal();
       } else {
         alert('Failed to start process. Please try again.');

@@ -13,7 +13,6 @@ import ProcessDetail from './ProcessDetail/ProcessDetail.jsx';
 import TaskList from './TaskList/TaskList.jsx';
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
     <UserProvider>
       <BrowserRouter>
         <Routes>
@@ -28,5 +27,4 @@ createRoot(document.getElementById('root')).render(
         </Routes>
       </BrowserRouter>
     </UserProvider>
-  </StrictMode>
 );

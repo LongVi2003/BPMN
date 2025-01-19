@@ -4,53 +4,71 @@ import nextArrow from '../../assets/next.png';
 import maximize from '../../assets/maximize.png';
 import user from '../../assets/user.png';
 
-const TasklistRight = ({ selectedTask }) => {
+const TasklistRight = ({ selectedTask, setSelectedTask }) => {
   const [activeTab, setActiveTab] = useState('forms');
-  const [formVariables, setFormVariables] = useState(null);
+  const [form, setForm] = useState(null);
   const [claimBy, setClaimBy] = useState(null);
 
-  // Fetch form data when tab or selectedTask changes
+
   useEffect(() => {
-    if (activeTab === 'forms' && selectedTask?.id) {
-      const fetchFormData = async () => {
-        try {
-          const formResponse = await fetch(
-            `http://localhost:8080/engine-rest/task/${selectedTask.id}/form`
-          );
-
-          if (!formResponse.ok) {
-            throw new Error('Failed to fetch form information');
-          }
-
-          const formInfo = await formResponse.json();
-
-          // Check if form has a key and fetch form variables
-          if (formInfo?.key) {
-            try {
-              const variablesResponse = await fetch(
-                `http://localhost:8080/engine-rest/task/${selectedTask.id}/form-variables`
-              );
-
-              if (!variablesResponse.ok) {
-                throw new Error('Failed to fetch form variables');
-              }
-
-              const formVariablesData = await variablesResponse.json();
-              setFormVariables({ type: 'variables', content: formVariablesData });
-            } catch (error) {
-              console.error('Error fetching form variables:', error.message);
-              alert('Failed to fetch form data.');
-            }
-          }
-        } catch (error) {
-          console.error(`Error fetching form for task ${selectedTask.id}:`, error.message);
-          setFormVariables(null);
-        }
-      };
-
+    if (selectedTask) {
+      fetchClaimInfo();
       fetchFormData();
     }
-  }, [activeTab, selectedTask]);
+  }, [selectedTask]);
+
+  const fetchClaimInfo = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/engine-rest/task/${selectedTask.id}`
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch task information');
+      }
+
+      const data = await response.json();
+      setClaimBy(data.assignee);
+    } catch (error) {
+      console.error(`Error fetching task info:`, error.message);
+    }
+  };
+
+  const fetchFormData = async () => {
+    try {
+      const formResponse = await fetch(
+        `http://localhost:8080/engine-rest/task/${selectedTask.id}/form`
+      );
+
+      if (!formResponse.ok) {
+        throw new Error('Failed to fetch form information');
+      }
+
+      const formInfo = await formResponse.json();
+
+      // Handle formKey for embedded forms
+      if (formInfo?.formKey) {
+        const formUrl = formInfo.formKey.replace('embedded:app:', 'http://localhost:8080/');
+        setForm({ type: 'embedded', content: formUrl });
+      } else {
+        // Handle form variables if no embedded form
+        const variablesResponse = await fetch(
+          `http://localhost:8080/engine-rest/task/${selectedTask.id}/form-variables`
+        );
+
+        if (!variablesResponse.ok) {
+          throw new Error('Failed to fetch form variables');
+        }
+
+        const formVariablesData = await variablesResponse.json();
+        setForm({ type: 'variables', content: formVariablesData });
+      }
+    } catch (error) {
+      console.error(`Error fetching form for task ${selectedTask.id}:`, error.message);
+      setForm(null);
+    }
+  };
+
 
   // Handle form variable changes
   const handleInputChange = (key, value) => {
@@ -90,11 +108,11 @@ const TasklistRight = ({ selectedTask }) => {
       }
     } catch (e) {
       console.error('Error claiming task:', e);
-      alert('Failed to claim task. Please try again.');
+      
     }
   };
 
-  // Complete task
+  // Complete task and load the next one
   const handleCompleteTask = async () => {
     if (!selectedTask?.id) {
       alert('No task selected to complete');
@@ -103,7 +121,7 @@ const TasklistRight = ({ selectedTask }) => {
 
     try {
       const variables =
-        formVariables?.type === 'variables' ? formVariables.content : {};
+        form?.type === 'variables' ? form.content : {};
 
       const response = await fetch(
         `http://localhost:8080/engine-rest/task/${selectedTask.id}/complete`,
@@ -123,6 +141,28 @@ const TasklistRight = ({ selectedTask }) => {
 
       if (response.ok) {
         alert('Task completed successfully!');
+
+        // Fetch the next task
+        const nextTaskResponse = await fetch(
+          'http://localhost:8080/engine-rest/task',
+          { method: 'GET' }
+        );
+
+        if (!nextTaskResponse.ok) {
+          throw new Error('Failed to fetch the next task');
+        }
+
+        const nextTasks = await nextTaskResponse.json();
+
+
+        if (nextTasks.length > 0) {
+          const nextTask = nextTasks[0]; 
+          setSelectedTask(nextTask);
+        } else {
+          alert('No more tasks available.');
+          setSelectedTask(null); 
+        }
+
         setClaimBy(null);
         setFormVariables(null);
       } else {
@@ -131,18 +171,30 @@ const TasklistRight = ({ selectedTask }) => {
       }
     } catch (e) {
       console.error('Error completing task:', e);
-      alert('Failed to complete task. Please try again.');
+      setFormVariables(null)
     }
   };
 
   // Render form based on formVariables
   const renderForm = () => {
-    if (!formVariables) return <p>Loading form...</p>;
+    if (!form) return <p>Loading form...</p>;
 
-    if (formVariables.type === 'variables') {
+    if(form.type === 'embedded') {
       return (
-        <form>
-          {Object.entries(formVariables.content).map(([key, variable]) => (
+        <iframe
+          title="Embedded Form"
+          className="embedded-form"
+          src={formVariables.content}
+          width="100%"
+          height="500"
+        ></iframe>
+      );
+    }
+
+    if (form.type === 'variables') {
+      return (
+        <form className="form-task">
+          {Object.entries(form.content).map(([key, variable]) => (
             <div className="form-group" key={key}>
               <label htmlFor={key}>{variable.label || key}</label>
               {variable.type === 'String' && (
