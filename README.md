@@ -10,6 +10,16 @@
 - Process Definition Detail và Variables
 - Tính năng Camunda Tasklist: hiển thị các Tasklist và Start Process
 - Complete các biểu mẫu form tasklist
+## Tech Stack
+1. Front End
+   - Framework: React
+   - Styling: Css
+2. Back End
+   - Framework: Node.js
+   - Language: JavaScript
+   - API
+3. DataBase
+   - NoSQL: MongoDB 
 ## Giao diện
 - Giao diện chính
   ![image](https://github.com/user-attachments/assets/750e3978-7b0e-4407-8ebe-057fe8990c81)
